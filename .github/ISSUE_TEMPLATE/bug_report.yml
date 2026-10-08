@@ -1,0 +1,27 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+  - type: input
+    id: version
+    attributes:
+      label: Version (npx google-search-console-connector --version)
+  - type: dropdown
+    id: client
+    attributes:
+      label: Where were you using it?
+      options: [Claude Code, Google Antigravity, Other MCP client, CLI, Dashboard]
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and Node.js version

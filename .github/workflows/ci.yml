@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node --check web/assets/dashboard.js && node --check web/assets/connect.js && node --check web/assets/common.js
+      - name: Report export works with sample data
+        run: |
+          mkdir -p /tmp/site && cd /tmp/site
+          echo '{"siteUrl":"sc-domain:northshore-plumbing.com"}' > .gsc-connect.json
+          GSC_CONNECT_DEMO=1 GSC_CONNECT_UPDATE_CHECK=0 node "$GITHUB_WORKSPACE/dist/index.js" report --days 28
+          ls .gsc-reports/*/*/summary.md

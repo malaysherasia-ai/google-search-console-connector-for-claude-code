@@ -1,0 +1,33 @@
+# never-again (local only)
+.claude/never-again/fires.log
+.claude/never-again/calls.log
+.claude/never-again/.update-check
+.claude/never-again/.capture-none
+.claude/never-again/failures.log
+.claude/never-again/.failures-open
+.claude/never-again/verified/
+.claude/never-again/.last-boot
+CLAUDE.md.bak
+AGENTS.md.bak
+GEMINI.md.bak
+.github/copilot-instructions.md.bak
+node_modules/
+dist/
+*.tmp
+.gsc-connect.json
+
+# Machine-specific Claude Code settings (never-again's installer re-registers hooks per clone)
+.claude/settings.json
+.claude/settings.local.json
+
+# GSD (get-shit-done) install: install it yourself with `npx get-shit-done-cc@latest --claude --local`
+.claude/.gsd-profile
+.claude/agents/gsd-*
+.claude/commands/gsd/
+.claude/get-shit-done/
+.claude/gsd-*
+.claude/hooks/gsd-*
+.claude/package.json
+
+# Search Console exports
+.gsc-reports/

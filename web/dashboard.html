@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Search Console Dashboard</title>
+    <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="/assets/app.css" />
+    <link rel="stylesheet" href="/assets/dashboard.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#overview">
+          <img class="brand-mark" src="/assets/logo.svg" alt="" />
+          <span class="brand-name"><strong>Search Console</strong><span>Connector</span></span>
+        </a>
+
+        <nav class="nav" aria-label="Dashboard">
+          <p class="nav-group">Performance</p>
+          <a href="#overview" data-view="overview"><span data-icon="overview"></span>Overview</a>
+          <a href="#queries" data-view="queries"><span data-icon="queries"></span>Queries</a>
+          <a href="#pages" data-view="pages"><span data-icon="pages"></span>Pages</a>
+          <a href="#opportunities" data-view="opportunities"><span data-icon="opportunities"></span>Opportunities</a>
+          <p class="nav-group">Index</p>
+          <a href="#indexing" data-view="indexing"><span data-icon="indexing"></span>Sitemaps &amp; inspection</a>
+          <p class="nav-group">Account</p>
+          <a href="#settings" data-view="settings"><span data-icon="settings"></span>Settings</a>
+        </nav>
+
+        <div class="account" id="account"></div>
+      </aside>
+      <div class="scrim" id="scrim" hidden></div>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="btn btn-ghost btn-icon menu-btn" id="menu-btn" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false"><span data-icon="menu"></span></button>
+
+          <div class="property-picker">
+            <img id="site-favicon" alt="" width="20" height="20" hidden />
+            <label class="sr-only" for="site-select">Property</label>
+            <select class="select site-select" id="site-select"></select>
+          </div>
+
+          <div class="topbar-controls">
+            <div class="segmented" id="range" role="group" aria-label="Date range">
+              <button type="button" data-range="1" title="Last 24 hours" aria-label="Last 24 hours">24h</button>
+              <button type="button" data-range="7" title="Last 7 days" aria-label="Last 7 days">7d</button>
+              <button type="button" data-range="28" title="Last 28 days" aria-label="Last 28 days">28d</button>
+              <button type="button" data-range="90" title="Last 3 months" aria-label="Last 3 months">3m</button>
+              <button type="button" data-range="180" title="Last 6 months" aria-label="Last 6 months">6m</button>
+              <button type="button" data-range="365" title="Last 12 months" aria-label="Last 12 months">12m</button>
+              <button type="button" data-range="480" title="Last 16 months" aria-label="Last 16 months">16m</button>
+            </div>
+            <label class="sr-only" for="type-select">Search type</label>
+            <select class="select type-select" id="type-select">
+              <option value="web">Web</option>
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+              <option value="news">News</option>
+              <option value="discover">Discover</option>
+              <option value="googleNews">Google News</option>
+            </select>
+            <button class="btn btn-icon" id="refresh-btn" type="button" aria-label="Refresh data" title="Refresh data"><span data-icon="refresh"></span></button>
+            <button class="btn btn-icon" id="theme-btn" type="button" aria-label="Switch theme" title="Switch theme"><span data-icon="moon"></span></button>
+          </div>
+        </header>
+
+        <main class="content" id="content" tabindex="-1"></main>
+      </div>
+    </div>
+    <script type="module" src="/assets/dashboard.js"></script>
+  </body>
+</html>

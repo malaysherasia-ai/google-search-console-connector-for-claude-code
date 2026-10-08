@@ -1,0 +1,38 @@
+name: Google Search Console updates
+
+# Weekly: diff Google's Search Console API definitions and Search Central posts,
+# open an issue when something changed, and commit the new snapshot.
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: check
+        run: node scripts/check-google-updates.mjs --update --report report.md
+      - name: Open an issue
+        if: steps.check.outputs.changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create google-update --color 1a73e8 --description "Google changed Search Console or its API" || true
+          gh issue create --title "Google Search Console changes $(date -u +%Y-%m-%d)" --body-file report.md --label google-update
+      - name: Commit snapshot
+        if: steps.check.outputs.changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add google-api/snapshot.json
+          git commit -m "chore: update Google API snapshot"
+          git push

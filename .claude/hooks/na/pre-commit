@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# never-again git runner. Installed as .claude/hooks/na/pre-commit and called
+# from .git/hooks/pre-commit, so commit-time hooks apply to every commit: from
+# Claude Code's Bash tool, from any other tool, and from a person at a shell.
+#
+# Hands the commit to the dispatcher with NA_EVENT=git. In warn mode a hook
+# prints its reason and the commit goes ahead; in block mode the commit is
+# refused. Retired hooks are silent.
+set -uo pipefail
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+# Git Bash reports /c/...; the Python and Node the hooks call need C:/... .
+case "$(uname -s 2>/dev/null)" in
+  MINGW*|MSYS*|CYGWIN*) command -v cygpath >/dev/null 2>&1 && ROOT="$(cygpath -m "$ROOT")" ;;
+esac
+export CLAUDE_PROJECT_DIR="$ROOT" NA_EVENT=git
+[ -f "$ROOT/.claude/hooks/na/dispatch" ] || exit 0
+exec bash "$ROOT/.claude/hooks/na/dispatch" </dev/null

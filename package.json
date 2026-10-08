@@ -1,0 +1,71 @@
+{
+  "name": "google-search-console-connector",
+  "version": "0.1.0",
+  "description": "Google Search Console for Claude Code: MCP server, one-command GSC report export (CSV), URL inspection, sitemaps, site verification and a local SEO dashboard. Sign in with Google; runs locally on your own Google Cloud project.",
+  "keywords": [
+    "google-search-console",
+    "search-console",
+    "search-console-api",
+    "gsc",
+    "gsc-api",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude-code",
+    "claude",
+    "antigravity",
+    "seo",
+    "seo-tools",
+    "seo-dashboard",
+    "search-analytics",
+    "url-inspection",
+    "sitemaps",
+    "site-verification",
+    "google-oauth",
+    "csv-export"
+  ],
+  "homepage": "https://claude-repo.com/google-search-console-connector",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/malaysherasia-ai/google-search-console-connector-for-claude-code.git"
+  },
+  "bugs": {
+    "url": "https://github.com/malaysherasia-ai/google-search-console-connector-for-claude-code/issues"
+  },
+  "license": "MIT",
+  "author": "malaysherasia-ai",
+  "type": "module",
+  "bin": {
+    "google-search-console-connector": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "web",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "dashboard": "node dist/index.js dashboard",
+    "connect": "node dist/index.js connect",
+    "prepublishOnly": "npm run build",
+    "check:google": "node scripts/check-google-updates.mjs",
+    "demo": "node dist/index.js demo",
+    "report": "node dist/index.js report"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "open": "^11.0.4",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2"
+  }
+}

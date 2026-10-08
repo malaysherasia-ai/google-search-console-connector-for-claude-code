@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# never-again git runner for the commit message. Installed as
+# .claude/hooks/na/commit-msg and called from .git/hooks/commit-msg with the
+# message file, which is the first moment git shows the message. Runs the
+# capture check only: the lesson hooks already ran from pre-commit. This is
+# how the check reaches a commit from a terminal, and from an agent whose
+# own hook never ran.
+set -uo pipefail
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+case "$(uname -s 2>/dev/null)" in
+  MINGW*|MSYS*|CYGWIN*) command -v cygpath >/dev/null 2>&1 && ROOT="$(cygpath -m "$ROOT")" ;;
+esac
+MSG="${1:-}"
+case "$MSG" in ""|/*|[A-Za-z]:*) ;; *) MSG="$PWD/$MSG" ;; esac
+export CLAUDE_PROJECT_DIR="$ROOT" NA_EVENT=git NA_MSG_FILE="$MSG"
+[ -f "$ROOT/.claude/hooks/na/_capture.sh" ] || exit 0
+exec bash "$ROOT/.claude/hooks/na/_capture.sh" </dev/null

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connect Search Console</title>
+    <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Roboto:wght@500&display=swap" />
+    <link rel="stylesheet" href="/assets/app.css" />
+    <link rel="stylesheet" href="/assets/connect.css" />
+  </head>
+  <body>
+    <div class="connect">
+      <aside class="connect-rail">
+        <a class="brand" href="/">
+          <img class="brand-mark" src="/assets/logo.svg" alt="" />
+          <span class="brand-name"><strong>Search Console Connector</strong><span>for Claude Code</span></span>
+        </a>
+
+        <div class="rail-intro">
+          <h1>Connect <span id="project-name">your project</span> to Google Search Console</h1>
+          <p>Sign in once. Claude Code can then read performance data, inspect URLs and manage sitemaps for this site.</p>
+        </div>
+
+        <ol class="stepper" id="stepper">
+          <li data-step="cloud">
+            <span class="step-dot" aria-hidden="true"></span>
+            <span><strong>Google Cloud credentials</strong><small>One-time OAuth client setup</small></span>
+          </li>
+          <li data-step="signin">
+            <span class="step-dot" aria-hidden="true"></span>
+            <span><strong>Sign in with Google</strong><small>Grant Search Console access</small></span>
+          </li>
+          <li data-step="property">
+            <span class="step-dot" aria-hidden="true"></span>
+            <span><strong>Choose a property</strong><small>Link it to this project</small></span>
+          </li>
+        </ol>
+
+        <div class="rail-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
+          <p>Runs on this computer only. Your Google tokens are stored in your home folder and are never sent to us or anyone else.</p>
+        </div>
+      </aside>
+
+      <main class="connect-main">
+        <div class="connect-panel" id="panel" aria-live="polite">
+          <div class="panel-loading"><span class="spinner"></span> Loading</div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/assets/connect.js"></script>
+  </body>
+</html>

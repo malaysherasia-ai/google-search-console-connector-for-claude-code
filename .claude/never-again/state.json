@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "nextId": 3,
+  "cap": 40,
+  "loadedWarn": 60,
+  "tokensPerPreventedRepeat": 8000,
+  "promotion": "pull-request",
+  "updates": "check",
+  "capture": "warn",
+  "lessons": {
+    "L001": {
+      "form": "rule",
+      "scope": "tooling",
+      "rule": "In scripted file edits, assert each old string matches exactly once and open files with encoding='utf-8'",
+      "file": "LESSONS.md",
+      "created": "2026-10-08"
+    },
+    "L002": {
+      "form": "hook",
+      "mode": "warn",
+      "scope": "web",
+      "rule": "Use fill(el, ...) instead of el.replaceChildren() in web/assets",
+      "file": "LESSONS.md",
+      "trigger": "commit",
+      "created": "2026-10-08"
+    }
+  }
+}

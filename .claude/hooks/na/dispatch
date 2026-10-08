@@ -1,0 +1,224 @@
+#!/usr/bin/env bash
+# never-again dispatcher. Installed as .claude/hooks/na/dispatch. One entry in
+# the agent's hook config points here (Claude Code's settings.json by default;
+# `--agent codex|gemini|copilot|antigravity` for the others), and git's
+# pre-commit runner calls it with NA_EVENT=git. It does once what every hook
+# used to do for itself: read the payload, find an interpreter, decide whether
+# this is a commit, list the changed files, read every hook's mode. Then it
+# runs only the hooks whose trigger and watched extensions match, and merges
+# their answers into one decision in the shape the calling agent expects.
+# Ten hooks cost one setup, not ten.
+#
+# The index it runs from is `na _index`: one line per live hook with its
+# mode, trigger and WATCH list, read from state.json and the scripts.
+set -uo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/na-lib.sh"
+
+NA_AGENT="${NA_AGENT:-}"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --agent) NA_AGENT="${2:-}"; shift ;;
+    --agent=*) NA_AGENT="${1#--agent=}" ;;
+  esac
+  shift
+done
+export NA_AGENT
+
+# The payload first: it carries the working directory, which is how a runner
+# without CLAUDE_PROJECT_DIR (every agent but Claude Code) finds the repo.
+NA_PAYLOAD=""
+[ "${NA_EVENT:-}" = "git" ] || NA_PAYLOAD="$(cat)"
+
+# The entry has no `if` filter, so this runs on every Bash call. A command
+# that is not a commit cannot contain the word; leave before any interpreter
+# starts, which is the whole cost for the ordinary call.
+if [ "${NA_EVENT:-}" != "git" ]; then
+  case "$NA_PAYLOAD" in *commit*) ;; *) exit 0 ;; esac
+fi
+
+if ! NA_PY="$(NA_PYTHON="${NA_PY:-${NA_PYTHON:-}}" na_python)"; then
+  if [ "${NA_EVENT:-}" = "git" ]; then
+    echo "never-again: no working python found; no hook ran. Install Python 3.7+ or set NA_PYTHON." >&2
+  else
+    printf '{"systemMessage":"never-again: no working python found; no hook ran. Install Python 3.7+ or set NA_PYTHON."}\n'
+  fi
+  exit 0
+fi
+
+NA_CMD=""; NA_FILE=""; NA_TOOL_USE_ID=""; NA_CWD=""
+if [ "${NA_EVENT:-}" != "git" ]; then
+  eval "$(na_payload_vars "$NA_PAYLOAD")"
+  na_root_from "$NA_CWD"
+fi
+na_env
+export NA_PY NA_DISPATCHED=1 NA_CMD NA_FILE NA_TOOL_USE_ID NA_AGENT
+
+IS_COMMIT=0
+if [ "$NA_SOURCE" = "git" ] || na_is_commit "$NA_CMD"; then IS_COMMIT=1; fi
+
+# The index: id, mode, trigger, watch. One spawn, however many hooks.
+INDEX="$("$NA_PY" "$NA_CLI" _index 2>/dev/null)" || INDEX=""
+INDEX="${INDEX//$'\r'/}"
+# No live hook and not a commit: nothing to do. A commit still gets the
+# release nudge and its calls.log line, hooks or not.
+[ -z "$INDEX" ] && [ "$IS_COMMIT" -eq 0 ] && exit 0
+
+# Modes for every hook in one variable, so na_mode never spawns again.
+NA_MODES="$(printf '%s\n' "$INDEX" | awk -F'\t' '{printf "%s=%s;", $1, $2}')"
+export NA_MODES
+
+# Changed files once; na_changed_files in each hook filters this list.
+# Assigned only when set: na_changed_files takes a set-but-empty value as
+# "the dispatcher found nothing", and it must list the files itself here.
+if [ -n "$INDEX" ]; then
+  NA_CHANGED_ALL="$(na_changed_files)"
+  export NA_CHANGED_ALL
+fi
+
+HOOKS_DIR="$NA_ROOT/.claude/hooks/na"
+OUTS=""
+RC=0
+while IFS=$'\t' read -r id mode trigger watch; do
+  [ -n "$id" ] || continue
+  case "$mode" in warn|block) ;; *) continue ;; esac
+  if [ "$trigger" = "commit" ] && [ "$IS_COMMIT" -eq 0 ]; then continue; fi
+  if [ -n "$watch" ] && [ "$watch" != "-" ]; then
+    hit=0
+    for ext in $watch; do
+      if printf '%s\n' "$NA_CHANGED_ALL" | grep -q "${ext//./\\.}\$"; then hit=1; break; fi
+    done
+    [ "$hit" -eq 1 ] || continue
+  fi
+  script="$HOOKS_DIR/$id.sh"
+  [ -f "$script" ] || continue
+  if [ "$NA_SOURCE" = "git" ]; then
+    # A warn under git prints its reason and exits 0, so the exit code alone
+    # said "clean" for every warn fire: the first real catch in the field
+    # was logged as a clean commit. What the hook said is the verdict, as
+    # it is under Claude Code; the exit code only decides block.
+    err="$(bash "$script" </dev/null 2>&1)" || RC=1
+    [ -n "$err" ] && { printf '%s\n' "$err" >&2; OUTS="$OUTS$err"$'\n'; }
+  else
+    out="$(bash "$script" </dev/null)"
+    [ -n "$out" ] && OUTS="$OUTS$out"$'\n'
+  fi
+done <<<"$INDEX"
+
+# The capture check: a commit that says it is a fix and files no lesson.
+# Under git it runs from the commit-msg hook instead, which is where the
+# message first shows; the pre-commit runner has no message to read.
+if [ "$IS_COMMIT" -eq 1 ] && [ "$NA_SOURCE" != "git" ] && [ -f "$HOOKS_DIR/_capture.sh" ]; then
+  out="$(bash "$HOOKS_DIR/_capture.sh" </dev/null)"
+  [ -n "$out" ] && OUTS="$OUTS$out"$'\n'
+fi
+
+# A newer release, from the cache the after-commit hook keeps. No network
+# here. Under "updates": "check" it is one line on a commit that goes ahead;
+# under "block" the commit is refused until `na upgrade` moves the repo or
+# `na upgrade --later` defers it for a day. The line was the first design,
+# and an agent committed straight past it: a command that succeeded is not
+# read, a refused one is. The nudge stays out of the calls.log verdict; the
+# stop is a fired call, since it stopped the commit.
+UPNOTE=""
+if [ "$IS_COMMIT" -eq 1 ]; then
+  NEWER="$("$NA_PY" "$NA_CLI" _check-update --cached --how 2>/dev/null)"; NEWER="${NEWER//$'\r'/}"
+  HOW="${NEWER#* }"; NEWER="${NEWER%% *}"
+  if [ -n "$NEWER" ]; then
+    HAVE="$("$NA_PY" "$NA_CLI" --version | sed 's/.* //')"
+    if [ "$HOW" = "stop" ]; then
+      STOPMSG="never-again $NEWER is out (this repo has $HAVE). This commit is stopped until the repo moves: run .claude/never-again/na upgrade, then commit again. Not now: .claude/never-again/na upgrade --later lets commits through until tomorrow or the next release."
+      if [ "$NA_SOURCE" = "git" ]; then
+        echo "$STOPMSG" >&2; RC=1
+      else
+        OUTS="$OUTS$("$NA_PY" -c 'import json,sys; print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": sys.argv[1]}}))' "$STOPMSG")"$'\n'
+      fi
+    elif [ "$NA_SOURCE" = "git" ]; then
+      echo "never-again $NEWER is out (this repo has $HAVE): .claude/never-again/na upgrade" >&2
+    else
+      UPNOTE='{"systemMessage":"never-again '"$NEWER"' is out: run .claude/never-again/na upgrade when convenient"}'$'\n'
+    fi
+  fi
+fi
+
+# One line per commit this dispatcher saw, whoever called it. Answers the
+# question a field run could not: did the agent call the hook at all?
+if [ "$IS_COMMIT" -eq 1 ] && [ -z "${NA_DRY_RUN:-}" ]; then
+  verdict=clean
+  { [ -n "$OUTS" ] || [ "$RC" -ne 0 ]; } && verdict=fired
+  who="${NA_AGENT:-claude}"; [ "$NA_SOURCE" = "git" ] && who="-"   # git does not know who committed
+  printf '%s\t%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$who" "$NA_SOURCE" "$verdict" \
+    >> "$NA_ROOT/.claude/never-again/calls.log" 2>/dev/null || true
+fi
+OUTS="$OUTS$UPNOTE"
+
+[ "$NA_SOURCE" = "git" ] && exit "$RC"
+[ -z "$OUTS" ] && exit 0
+
+# Merge: deny beats ask; reasons are joined; system messages are joined. The
+# hooks always speak Claude Code's dialect; the last step translates it.
+printf '%s' "$OUTS" | "$NA_PY" -c '
+import json, sys
+agent = sys.argv[1] or "claude"
+decision, reasons, notes = None, [], []
+for line in sys.stdin.read().splitlines():
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        d = json.loads(line)
+    except ValueError:
+        continue
+    h = d.get("hookSpecificOutput") or {}
+    if h.get("permissionDecision") == "deny":
+        decision = "deny"
+    elif h.get("permissionDecision") == "ask" and decision != "deny":
+        decision = "ask"
+    if h.get("permissionDecisionReason"):
+        reasons.append(h["permissionDecisionReason"])
+    if d.get("systemMessage"):
+        notes.append(d["systemMessage"])
+reason, note = " | ".join(reasons), " | ".join(notes)
+out = {}
+if agent in ("claude", "codex"):
+    # Codex copies Claude Code'"'"'s shape but parses "ask" without acting on
+    # it, so a warn there is an allow with the reason in front of the model.
+    if decision == "ask" and agent == "codex":
+        out["hookSpecificOutput"] = {"hookEventName": "PreToolUse",
+                                    "permissionDecision": "allow",
+                                    "additionalContext": reason}
+    elif decision:
+        out["hookSpecificOutput"] = {"hookEventName": "PreToolUse",
+                                    "permissionDecision": decision,
+                                    "permissionDecisionReason": reason}
+    if note:
+        out["systemMessage"] = note
+elif agent == "copilot":
+    # Top-level decision, no message channel: the note rides in the reason.
+    if decision:
+        out["permissionDecision"] = decision
+        out["permissionDecisionReason"] = reason
+    elif note:
+        out["permissionDecision"] = "allow"
+        out["permissionDecisionReason"] = note
+elif agent == "gemini":
+    # Only deny exists; a warn is a systemMessage the person sees.
+    if decision == "deny":
+        out["decision"] = "deny"
+        out["reason"] = reason
+    if note or decision == "ask":
+        out["systemMessage"] = note or reason
+elif agent == "antigravity":
+    # The IDE reads decision/reason (allow, deny, ask); the CLI write-ups
+    # show allow_tool/deny_reason. Send both; each ignores the other.
+    out["decision"] = decision or "allow"
+    out["allow_tool"] = decision != "deny"
+    if decision:
+        out["reason"] = reason
+    if decision == "deny":
+        out["deny_reason"] = reason
+    if note:
+        out["systemMessage"] = note
+if out:
+    print(json.dumps(out))
+' "$NA_AGENT"
+exit 0

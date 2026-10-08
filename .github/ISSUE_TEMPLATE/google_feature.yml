@@ -1,0 +1,14 @@
+name: New Search Console feature
+description: Google added something to Search Console that this tool should support
+labels: [google-update]
+body:
+  - type: input
+    id: link
+    attributes:
+      label: Google announcement or API reference link
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What should the connector do with it?
