@@ -1,109 +1,119 @@
-/* Search Console Connector — shared design tokens and components */
+/* Search Console Connector: the claude-repo.com brand.
+   Same palette, type and fonts as claude-repo.com (dark by default), with a
+   light theme for people who prefer it. Fonts are self-hosted: no requests to
+   Google Fonts or any other third party. Inter and JetBrains Mono are under
+   the SIL Open Font License (see fonts/OFL.txt). */
 
+@font-face {
+  font-family: "Inter"; font-style: normal; font-weight: 100 900;
+  font-display: swap; src: url("/assets/fonts/inter-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter"; font-style: normal; font-weight: 100 900;
+  font-display: swap; src: url("/assets/fonts/inter-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "JetBrains Mono"; font-style: normal; font-weight: 100 800;
+  font-display: swap; src: url("/assets/fonts/jetbrains-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono"; font-style: normal; font-weight: 100 800;
+  font-display: swap; src: url("/assets/fonts/jetbrains-mono-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Dark (default): claude-repo.com tokens. */
 :root {
-  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --nav: #13233f;
-  --nav-2: #1b2f52;
-  --nav-ink: #c9d4ea;
-  --nav-ink-strong: #ffffff;
+  --nav: #0A0A0A;
+  --nav-2: #17181B;
+  --nav-ink: #8A9099;
+  --nav-ink-strong: #E8EAED;
+  --nav-line: rgba(255, 255, 255, 0.08);
 
-  --bg: #f4f6fa;
-  --surface: #ffffff;
-  --surface-2: #f8f9fc;
-  --line: #e2e7f0;
-  --line-strong: #cfd6e3;
-  --ink: #16202f;
-  --ink-2: #4b576b;
-  --ink-3: #758197;
+  --bg: #0A0A0A;
+  --surface: #101113;
+  --surface-2: #17181B;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --ink: #E8EAED;
+  --ink-2: #A9AFB8;
+  --ink-3: #808790;
 
-  --brand: #2b59e8;
-  --brand-ink: #ffffff;
-  --brand-soft: #e8eefd;
+  --brand: #7AA2FF;
+  --brand-ink: #0A0A0A;
+  --brand-soft: rgba(122, 162, 255, 0.12);
 
-  --m-clicks: #2f6ae4;
-  --m-impressions: #b5399f;
-  --m-ctr: #0b8f7c;
-  --m-position: #d9661a;
+  /* Metric identity colors. Only one metric is plotted at a time and each is
+     always labelled, so clicks keeps the exact brand blue. */
+  --m-clicks: #7AA2FF;
+  --m-impressions: #D865B8;
+  --m-ctr: #2FAE93;
+  --m-position: #E0893C;
 
-  --good: #12805c;
-  --good-soft: #e3f4ec;
-  --bad: #c4362c;
-  --bad-soft: #fbe9e7;
-  --warn: #a8670b;
-  --warn-soft: #fbf0dc;
+  --good: #3DD68C;
+  --good-soft: rgba(61, 214, 140, 0.12);
+  --bad: #F26D7D;
+  --bad-soft: rgba(242, 109, 125, 0.12);
+  --warn: #F5B547;
+  --warn-soft: rgba(245, 181, 71, 0.12);
 
-  --grid: #edf0f5;
-  --focus: #2b59e8;
-  --shadow: 0 1px 2px rgba(19, 35, 63, 0.06), 0 1px 1px rgba(19, 35, 63, 0.04);
-  --shadow-pop: 0 12px 32px rgba(19, 35, 63, 0.16);
+  --grid: rgba(255, 255, 255, 0.06);
+  --focus: #7AA2FF;
+  --shadow: none;
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.55);
 
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 12px;
+
+  color-scheme: dark;
+}
+
+/* Light: the same system on white, with darker accents for contrast. */
+:root[data-theme="light"] {
+  --nav: #0A0A0A;
+  --nav-2: #17181B;
+  --nav-ink: #8A9099;
+  --nav-ink-strong: #E8EAED;
+  --nav-line: rgba(255, 255, 255, 0.08);
+
+  --bg: #F5F6F8;
+  --surface: #FFFFFF;
+  --surface-2: #F8F9FB;
+  --line: #E3E6EB;
+  --line-strong: #CDD2DA;
+  --ink: #0A0A0A;
+  --ink-2: #4A5059;
+  --ink-3: #6B7280;
+
+  --brand: #3D6FE0;
+  --brand-ink: #FFFFFF;
+  --brand-soft: #EAF0FE;
+
+  --m-clicks: #3D6FE0;
+  --m-impressions: #A33AB8;
+  --m-ctr: #0B8F7C;
+  --m-position: #C9601A;
+
+  --good: #12805C;
+  --good-soft: #E3F4EC;
+  --bad: #C4362C;
+  --bad-soft: #FBE9E7;
+  --warn: #A8670B;
+  --warn-soft: #FBF0DC;
+
+  --grid: #EDF0F4;
+  --focus: #3D6FE0;
+  --shadow: 0 1px 2px rgba(10, 10, 10, 0.05);
+  --shadow-pop: 0 12px 32px rgba(10, 10, 10, 0.16);
 
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --nav: #0c1526;
-    --nav-2: #16233c;
-    --bg: #0f1726;
-    --surface: #141c2b;
-    --surface-2: #182234;
-    --line: #243049;
-    --line-strong: #2f3d59;
-    --ink: #e7ecf5;
-    --ink-2: #aab5c8;
-    --ink-3: #7f8ba1;
-    --brand: #5b86f0;
-    --brand-soft: #1c2a4a;
-    --m-clicks: #5b86f0;
-    --m-impressions: #cc58b6;
-    --m-ctr: #1fa58d;
-    --m-position: #d4712f;
-    --good: #3cc08f;
-    --good-soft: #12322a;
-    --bad: #f07a6f;
-    --bad-soft: #3a1d1d;
-    --warn: #e2a64a;
-    --warn-soft: #382a12;
-    --grid: #1e293d;
-    --focus: #7ea2ff;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5);
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --nav: #0c1526;
-  --nav-2: #16233c;
-  --bg: #0f1726;
-  --surface: #141c2b;
-  --surface-2: #182234;
-  --line: #243049;
-  --line-strong: #2f3d59;
-  --ink: #e7ecf5;
-  --ink-2: #aab5c8;
-  --ink-3: #7f8ba1;
-  --brand: #5b86f0;
-  --brand-soft: #1c2a4a;
-  --m-clicks: #5b86f0;
-  --m-impressions: #cc58b6;
-  --m-ctr: #1fa58d;
-  --m-position: #d4712f;
-  --good: #3cc08f;
-  --good-soft: #12322a;
-  --bad: #f07a6f;
-  --bad-soft: #3a1d1d;
-  --warn: #e2a64a;
-  --warn-soft: #382a12;
-  --grid: #1e293d;
-  --focus: #7ea2ff;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5);
-  color-scheme: dark;
 }
 
 *,
@@ -243,7 +253,7 @@ textarea {
   border: 1px solid #747775;
   background: #ffffff;
   color: #1f1f1f;
-  font-family: "Roboto", var(--font);
+  font-family: var(--font);
   font-weight: 500;
 }
 .btn-google:hover {
@@ -481,4 +491,29 @@ textarea.input {
 }
 .credit a {
   color: var(--ink-2);
+}
+
+/* Wordmark: lowercase, mono, brand-blue hyphen, as on claude-repo.com. */
+.wordmark {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.wordmark b {
+  color: #7AA2FF;
+  font-weight: inherit;
+}
+.sidebar,
+.connect-rail {
+  border-right: 1px solid var(--nav-line);
+}
+code,
+kbd {
+  font-family: var(--mono);
+}
+
+.brand-mark {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--nav-line);
 }

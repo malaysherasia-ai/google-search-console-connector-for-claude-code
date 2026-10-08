@@ -52,7 +52,7 @@
 .nav a[aria-current="page"] {
   background: var(--nav-2);
   color: var(--nav-ink-strong);
-  box-shadow: inset 3px 0 0 #4f7cf0;
+  box-shadow: inset 3px 0 0 #7AA2FF;
 }
 .nav svg,
 .account svg {
@@ -75,8 +75,8 @@
   height: 30px;
   flex: none;
   border-radius: 50%;
-  background: #4f7cf0;
-  color: #fff;
+  background: #7AA2FF;
+  color: #0A0A0A;
   font-weight: 600;
   font-size: 13px;
 }
@@ -832,7 +832,7 @@ td.sub {
     position: fixed;
     inset: 0;
     z-index: 30;
-    background: rgba(10, 18, 32, 0.5);
+    background: rgba(0, 0, 0, 0.6);
   }
   .menu-btn {
     display: inline-flex;

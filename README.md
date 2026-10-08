@@ -67,6 +67,8 @@ Claude calls `gsc_connect`, which opens a page in your browser:
 2. **Sign in with Google** with the account that has your Search Console access,
 3. pick which Search Console property belongs to this project.
 
+![Connect page: Sign in with Google, then choose the property for this project](docs/screenshots/sign-in-with-google.png)
+
 That's it. Until Google finishes reviewing the app, Google may show "Google hasn't verified this app"; choose **Advanced → Go to Search Console Connector**.
 
 **3. Ask away:**
@@ -116,8 +118,6 @@ Most people can skip this. Agencies and developers who want sign-in to run throu
 
 Both APIs are free. Your own client means quota and the consent screen are yours. To go back to the built-in sign-in, use the link at the top of that page, or Settings in the dashboard.
 
-![Connect page: step-by-step Google Cloud OAuth client setup](docs/screenshots/connect-google-cloud-setup.png)
-
 ## One-command Search Console reports
 
 ```bash
@@ -163,7 +163,7 @@ Reports go to `.gsc-reports/<site>/<date>_last-<n>-days/` in your project, and `
 
 | | |
 |---|---|
-| ![Opportunities: striking distance keywords and low CTR pages](docs/screenshots/opportunities.png) | ![Dark mode dashboard with 3-month trend](docs/screenshots/dashboard-dark.png) |
+| ![Opportunities: striking distance keywords and low CTR pages](docs/screenshots/opportunities.png) | ![Dashboard with a 3-month trend and chart notes](docs/screenshots/dashboard-3-months.png) |
 | ![Hourly Search Console data for the last 24 hours](docs/screenshots/hourly-data.png) | ![Sitemaps status and URL Inspection](docs/screenshots/sitemaps-url-inspection.png) |
 
 Try it without a Google account: `npx google-search-console-connector demo`.

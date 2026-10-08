@@ -24,7 +24,7 @@ export function initTheme() {
 }
 export function toggleTheme() {
   const root = document.documentElement;
-  const current = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const current = root.dataset.theme || "dark"; // dark is the claude-repo.com default
   const next = current === "dark" ? "light" : "dark";
   root.dataset.theme = next;
   try {

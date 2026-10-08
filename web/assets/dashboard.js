@@ -1431,7 +1431,7 @@ function renderAccount() {
 }
 
 function setThemeIcon() {
-  const dark = (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark";
+  const dark = (document.documentElement.dataset.theme || "dark") === "dark";
   const btn = $("#theme-btn");
   fill(btn, icon(dark ? "sun" : "moon"));
   btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");

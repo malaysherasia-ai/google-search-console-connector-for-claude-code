@@ -6,6 +6,10 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 
 First release.
 
+- One-click Google sign-in (built-in OAuth client; own Google Cloud project optional), site-verification permission requested only when needed
+- claude-repo.com brand: dark theme by default, Inter and JetBrains Mono self-hosted (no Google Fonts requests), gsc-connector wordmark, new icon
+- Privacy policy and Google verification guide in docs/
+
 - Browser Connect flow: Google Cloud OAuth client setup, Google sign-in (loopback + PKCE), property picker per project
 - MCP server with 18 tools for Claude Code, Antigravity and other MCP clients
 - One-command report export (`report`, `gsc_export_report`): Search Console's export files plus previous-period comparison, query-page pairs, sitemaps, `summary.md` and `report.json`

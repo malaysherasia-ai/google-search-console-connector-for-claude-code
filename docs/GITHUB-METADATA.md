@@ -5,7 +5,7 @@ Settings for https://github.com/malaysherasia-ai/google-search-console-connector
 ## About → Description (350 characters max)
 
 ```
-Google Search Console MCP server and SEO dashboard for Claude Code, Antigravity and any MCP client. Sign in with Google, export GSC performance reports to CSV with one command, inspect URLs, submit sitemaps, verify sites and split branded vs non-branded queries. Free, open source, runs locally on your own Google Cloud project.
+Google Search Console MCP server and SEO dashboard for Claude Code, Antigravity and any MCP client. Sign in with Google in one click, export GSC performance reports to CSV with one command, inspect URLs, submit sitemaps, verify sites and split branded vs non-branded queries. Free, open source, runs locally.
 ```
 
 ## About → Website
@@ -29,7 +29,7 @@ Settings → General → Social preview → upload `docs/social-preview.png` (12
 ```bash
 REPO=malaysherasia-ai/google-search-console-connector-for-claude-code
 gh repo edit $REPO \
-  --description "Google Search Console MCP server and SEO dashboard for Claude Code, Antigravity and any MCP client. Sign in with Google, export GSC performance reports to CSV with one command, inspect URLs, submit sitemaps, verify sites and split branded vs non-branded queries. Free, open source, runs locally on your own Google Cloud project." \
+  --description "Google Search Console MCP server and SEO dashboard for Claude Code, Antigravity and any MCP client. Sign in with Google in one click, export GSC performance reports to CSV with one command, inspect URLs, submit sitemaps, verify sites and split branded vs non-branded queries. Free, open source, runs locally." \
   --homepage "https://claude-repo.com/google-search-console-connector" \
   --enable-issues --enable-discussions \
   --add-topic google-search-console,search-console-api,gsc,mcp,mcp-server,model-context-protocol,claude-code,claude,anthropic,antigravity,seo,seo-tools,seo-dashboard,search-analytics,url-inspection,sitemap,google-oauth,csv-export,typescript,nodejs

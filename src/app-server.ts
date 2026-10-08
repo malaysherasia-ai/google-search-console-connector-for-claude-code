@@ -46,6 +46,8 @@ const MIME: Record<string, string> = {
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".ico": "image/x-icon",
+  ".woff2": "font/woff2",
+  ".txt": "text/plain; charset=utf-8",
 };
 
 export interface AppServer {
@@ -402,7 +404,7 @@ function send(res: http.ServerResponse, status: number, body: string | Buffer, t
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",
     "Content-Security-Policy":
-      "default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://www.google.com https://*.gstatic.com; connect-src 'self'; frame-ancestors 'none'",
+      "default-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://www.google.com https://*.gstatic.com; connect-src 'self'; frame-ancestors 'none'",
   });
   res.end(body);
 }
