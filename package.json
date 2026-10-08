@@ -57,7 +57,8 @@
     "prepublishOnly": "npm run build",
     "check:google": "node scripts/check-google-updates.mjs",
     "demo": "node dist/index.js demo",
-    "report": "node dist/index.js report"
+    "report": "node dist/index.js report",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
