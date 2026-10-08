@@ -14,14 +14,16 @@ const AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke";
 
-export const SCOPES = [
-  "openid",
-  "email",
-  // Read/write Search Console: needed to add properties and submit sitemaps.
-  "https://www.googleapis.com/auth/webmasters",
-  // Get verification tokens and verify ownership of new sites.
-  "https://www.googleapis.com/auth/siteverification",
-];
+// Asked at sign-in: read/write Search Console (reports, sitemaps, adding
+// properties) and the email address, to show which account is connected.
+export const SCOPES = ["openid", "email", "https://www.googleapis.com/auth/webmasters"];
+
+// Asked only the first time someone verifies a new site (incremental auth).
+export const VERIFY_SCOPE = "https://www.googleapis.com/auth/siteverification";
+
+export function hasScope(tokens: StoredTokens | undefined, scope: string): boolean {
+  return Boolean(tokens?.scope?.split(" ").includes(scope));
+}
 
 export class NotConnectedError extends Error {
   constructor(message = "Not connected to Google Search Console. Run the gsc_connect tool (or `npx google-search-console-connector connect`) first.") {
@@ -36,12 +38,14 @@ export interface PendingAuth {
   state: string;
   verifier: string;
   redirectUri: string;
+  /** Where the Connect page goes after Google sends the user back. */
+  returnTo?: "verify";
 }
 
 export function createAuthRequest(
   client: ClientCredentials,
   redirectUri: string,
-  loginHint?: string,
+  opts: { loginHint?: string; extraScopes?: string[]; returnTo?: "verify" } = {},
 ): PendingAuth {
   const verifier = base64url(crypto.randomBytes(48));
   const challenge = base64url(crypto.createHash("sha256").update(verifier).digest());
@@ -50,7 +54,7 @@ export function createAuthRequest(
     client_id: client.clientId,
     redirect_uri: redirectUri,
     response_type: "code",
-    scope: SCOPES.join(" "),
+    scope: [...SCOPES, ...(opts.extraScopes ?? [])].join(" "),
     code_challenge: challenge,
     code_challenge_method: "S256",
     state,
@@ -59,8 +63,8 @@ export function createAuthRequest(
     prompt: "consent select_account",
     include_granted_scopes: "true",
   });
-  if (loginHint) params.set("login_hint", loginHint);
-  return { url: `${AUTH_ENDPOINT}?${params}`, state, verifier, redirectUri };
+  if (opts.loginHint) params.set("login_hint", opts.loginHint);
+  return { url: `${AUTH_ENDPOINT}?${params}`, state, verifier, redirectUri, returnTo: opts.returnTo };
 }
 
 interface TokenResponse {

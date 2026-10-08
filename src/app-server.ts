@@ -14,7 +14,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as demo from "./demo.js";
 import * as gsc from "./gsc.js";
-import { type PendingAuth, createAuthRequest, exchangeCode, revokeAndClear } from "./oauth.js";
+import { type PendingAuth, VERIFY_SCOPE, createAuthRequest, exchangeCode, hasScope, revokeAndClear } from "./oauth.js";
+import { BUILTIN_VERIFIED, hasBuiltinClient } from "./builtin-client.js";
 import {
   type Annotation,
   brandRegex,
@@ -24,6 +25,9 @@ import {
   loadTokens,
   parseClientJson,
   saveClient,
+  clearTokens,
+  loadClientInfo,
+  removeClient,
   saveProjectLink,
   validateClient,
 } from "./store.js";
@@ -48,7 +52,7 @@ export interface AppServer {
   url: string;
   port: number;
   /** URL that logs the browser in; open it, don't share it. */
-  launchUrl(page?: "connect" | "dashboard"): string;
+  launchUrl(page?: "connect" | "dashboard", upgrade?: "verify"): string;
   /** Resolves when the user finishes the Connect flow. */
   waitForConnection(timeoutMs: number): Promise<ConnectResult>;
   close(): Promise<void>;
@@ -118,7 +122,7 @@ export async function startAppServer(projectDir: string, opts: { demo?: boolean 
       const t = url.searchParams.get("t") ?? "";
       if (!launchTokens.delete(t)) throw new HttpError(403, "This link has expired. Open the dashboard again from Claude Code or the CLI.");
       res.setHeader("Set-Cookie", `${COOKIE}=${sessionId}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${12 * 3600}`);
-      const next = url.searchParams.get("next") === "dashboard" ? "/dashboard" : "/connect";
+      const next = url.searchParams.get("next") === "dashboard" ? "/dashboard" : url.searchParams.get("upgrade") === "verify" ? "/connect?upgrade=verify" : "/connect";
       return redirect(res, next);
     }
 
@@ -140,7 +144,7 @@ export async function startAppServer(projectDir: string, opts: { demo?: boolean 
       }
       if (p === "/connect") return send(res, 200, await page("connect.html"), MIME[".html"]);
       if (p === "/dashboard") return send(res, 200, await page("dashboard.html"), MIME[".html"]);
-      if (p === "/auth/start") return authStart(res, url.searchParams.get("hint") ?? undefined);
+      if (p === "/auth/start") return authStart(res, url.searchParams.get("hint") ?? undefined, url.searchParams.get("scopes") === "verify");
       if (p === "/api/state") return json(res, await state());
       if (p === "/api/sites") return json(res, { sites: isDemo ? demo.DEMO_SITES : await gsc.listSites() });
       if (p === "/api/project") {
@@ -165,9 +169,17 @@ export async function startAppServer(projectDir: string, opts: { demo?: boolean 
       if (isDemo) return demoPost(p, body, res);
       switch (p) {
         case "/api/client": {
+          // Tokens belong to the client that issued them, so changing client means signing in again.
+          if (body.useBuiltin === true) {
+            if (!hasBuiltinClient()) throw new HttpError(400, "This version has no built-in sign-in client.");
+            await removeClient();
+            await clearTokens();
+            return json(res, { ok: true });
+          }
           const client =
             typeof body.json === "string" ? parseClientJson(body.json) : validateClient({ clientId: String(body.clientId ?? ""), clientSecret: String(body.clientSecret ?? "") });
           await saveClient(client);
+          await clearTokens();
           return json(res, { ok: true });
         }
         case "/api/project-link": {
@@ -269,15 +281,18 @@ export async function startAppServer(projectDir: string, opts: { demo?: boolean 
 
   async function state() {
     if (isDemo) {
-      return { hasClient: true, clientSource: "file", clientIdHint: "demo", connected: true, email: "demo@example.com", projectDir, projectName: path.basename(projectDir), linkedSite: demo.DEMO_SITES[0].siteUrl, configDir: CONFIG_DIR_DISPLAY, telemetryConsent: "denied", version: VERSION, demo: true, redirectUri: `${origin}/oauth/callback` };
+      return { hasClient: true, clientSource: "builtin", builtinAvailable: true, builtinVerified: true, canVerifySites: true, clientIdHint: "demo", connected: true, email: "demo@example.com", projectDir, projectName: path.basename(projectDir), linkedSite: demo.DEMO_SITES[0].siteUrl, configDir: CONFIG_DIR_DISPLAY, telemetryConsent: "denied", version: VERSION, demo: true, redirectUri: `${origin}/oauth/callback` };
     }
-    const client = await loadClient();
+    const { client, source } = await loadClientInfo();
     const tokens = await loadTokens();
     const link = await loadProjectLink(projectDir).catch(() => undefined);
     return {
       hasClient: Boolean(client),
-      clientSource: process.env.GSC_CLIENT_ID ? "environment" : client ? "file" : null,
-      clientIdHint: client ? `${client.clientId.slice(0, 12)}…` : null,
+      clientSource: source,
+      builtinAvailable: hasBuiltinClient(),
+      builtinVerified: BUILTIN_VERIFIED,
+      canVerifySites: hasScope(tokens, VERIFY_SCOPE),
+      clientIdHint: client && source !== "builtin" ? `${client.clientId.slice(0, 12)}…` : null,
       connected: Boolean(tokens),
       email: tokens?.email ?? null,
       projectDir,
@@ -291,10 +306,14 @@ export async function startAppServer(projectDir: string, opts: { demo?: boolean 
     };
   }
 
-  async function authStart(res: http.ServerResponse, hint?: string) {
+  async function authStart(res: http.ServerResponse, hint?: string, verify = false) {
     const client = await loadClient();
     if (!client) return redirect(res, "/connect");
-    pending = createAuthRequest(client, `${origin}/oauth/callback`, hint);
+    pending = createAuthRequest(client, `${origin}/oauth/callback`, {
+      loginHint: hint ?? (await loadTokens())?.email,
+      extraScopes: verify ? [VERIFY_SCOPE] : [],
+      returnTo: verify ? "verify" : undefined,
+    });
     return redirect(res, pending.url);
   }
 
@@ -315,7 +334,7 @@ export async function startAppServer(projectDir: string, opts: { demo?: boolean 
     } catch (err) {
       return redirect(res, `/connect?error=${encodeURIComponent((err as Error).message)}`);
     }
-    return redirect(res, "/connect?signedIn=1");
+    return redirect(res, auth.returnTo === "verify" ? "/connect?upgraded=verify" : "/connect?signedIn=1");
   }
 
   async function serveAsset(p: string, res: http.ServerResponse) {
@@ -330,11 +349,11 @@ export async function startAppServer(projectDir: string, opts: { demo?: boolean 
   return {
     url: origin,
     port,
-    launchUrl(pageName = "dashboard") {
+    launchUrl(pageName = "dashboard", upgrade) {
       const t = crypto.randomBytes(24).toString("base64url");
       launchTokens.add(t);
       setTimeout(() => launchTokens.delete(t), 10 * 60_000).unref();
-      return `${origin}/launch?t=${t}&next=${pageName}`;
+      return `${origin}/launch?t=${t}&next=${pageName}${upgrade ? `&upgrade=${upgrade}` : ""}`;
     },
     waitForConnection(timeoutMs) {
       lastResult = undefined;

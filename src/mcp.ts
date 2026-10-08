@@ -7,7 +7,7 @@ import open from "open";
 import { z } from "zod";
 import { type AppServer, startAppServer } from "./app-server.js";
 import * as gsc from "./gsc.js";
-import { revokeAndClear } from "./oauth.js";
+import { VERIFY_SCOPE, hasScope, revokeAndClear } from "./oauth.js";
 import { ensureGitignored, exportReport } from "./report.js";
 import { brandRegex, loadClient, loadProjectLink, loadTokens, saveProjectLink } from "./store.js";
 import { track } from "./telemetry.js";
@@ -39,6 +39,20 @@ function guard<A>(tool: string, fn: (args: A) => Promise<ToolResult>) {
       return { content: [{ type: "text", text: (err as Error).message }], isError: true };
     }
   };
+}
+
+/** Site verification needs one extra Google permission; ask for it the first time. */
+async function ensureVerifyScope(): Promise<void> {
+  if (gsc.isDemo()) return;
+  const tokens = await loadTokens();
+  if (!tokens) throw new Error("Not connected yet. Call gsc_connect first.");
+  if (hasScope(tokens, VERIFY_SCOPE)) return;
+  const a = await getApp();
+  await open(a.launchUrl("connect", "verify")).catch(() => undefined);
+  await a.waitForConnection(5 * 60_000);
+  if (!hasScope(await loadTokens(), VERIFY_SCOPE)) {
+    throw new Error("Site verification permission wasn't granted. The user can allow it from the page that opened in their browser.");
+  }
 }
 
 async function resolveSite(siteUrl?: string): Promise<string> {
@@ -367,6 +381,7 @@ export async function runMcpServer(): Promise<void> {
       annotations: { readOnlyHint: true },
     },
     guard("gsc_get_verification_token", async ({ siteUrl, method }: { siteUrl: string; method: gsc.VerificationMethod }) => {
+      await ensureVerifyScope();
       const res = await gsc.getVerificationToken(siteUrl, method);
       const how: Record<string, string> = {
         META: "Add this tag inside <head> on the home page, deploy, then call gsc_verify_site.",
@@ -389,6 +404,7 @@ export async function runMcpServer(): Promise<void> {
       },
     },
     guard("gsc_verify_site", async ({ siteUrl, method }: { siteUrl: string; method: gsc.VerificationMethod }) => {
+      await ensureVerifyScope();
       const res = await gsc.verifySite(siteUrl, method);
       return ok({ verified: true, ...res, next: "Call gsc_link_project to make it this project's default property." });
     }),

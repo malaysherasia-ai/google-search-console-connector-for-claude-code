@@ -3,7 +3,8 @@
 ## v1
 
 ### Authentication (AUTH)
-- [ ] **AUTH-01**: User can save a Google OAuth Desktop client (paste JSON or ID + secret) from the Connect page
+- [ ] **AUTH-01**: Default flow needs no Google Cloud setup: built-in client, "Sign in with Google" only; own client remains an advanced option
+- [ ] **AUTH-06**: Site-verification permission is requested only when first needed (incremental auth)
 - [ ] **AUTH-02**: User signs in with Google in the browser (loopback redirect, PKCE S256, state check)
 - [ ] **AUTH-03**: Refresh token is stored locally with 0600 permissions; access tokens refresh automatically
 - [ ] **AUTH-04**: User can disconnect, which revokes the token at Google

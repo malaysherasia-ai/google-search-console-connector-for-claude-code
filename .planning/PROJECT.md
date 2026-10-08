@@ -35,7 +35,6 @@ third-party server holding anyone's tokens.
 ### Out of Scope
 
 - Hosted/multi-tenant service: tokens never leave the user's machine
-- Shipping a shared Google OAuth client: unverified sensitive-scope apps cap at 100 users; each user brings their own Desktop client
 - GA4, Bing, rank tracking: separate connectors
 
 ## Context
@@ -48,7 +47,7 @@ third-party server holding anyone's tokens.
 
 - **Runtime**: Node.js >= 20, TypeScript, minimal deps (MCP SDK, zod, open)
 - **Security**: loopback-only server, session cookie, Host check, PKCE + state, tokens stored 0600 in ~/.gsc-connect
-- **Cost**: maintainer bears no per-user cost; all API usage on the user's own Google Cloud project
+- **Cost**: maintainer bears no per-user cost (APIs are free; no servers)
 - **Offline-friendly UI**: no chart/CSS libraries from CDNs; system-font fallback
 
 ## Key Decisions
@@ -56,7 +55,8 @@ third-party server holding anyone's tokens.
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | MCP server over a site-embedded widget | GSC access belongs to the Google account, not the website; Claude Code consumes MCP natively | Pending |
-| Bring-your-own OAuth client (LOCKED) | Every Google API call runs on the user's own Google Cloud project, so quota and any cost are theirs; maintainer pays nothing. Also avoids Google verification + 100-user cap | Pending |
+| ~~Bring-your-own OAuth client~~ (superseded 2026-10-08) | Real-user test: the Google Cloud setup step overwhelmed a non-technical user | Replaced |
+| Built-in shared Desktop OAuth client, own client optional (LOCKED) | Users just click "Sign in with Google". Search Console API is free, so the maintainer still pays $0; only Google's per-project quota is shared (40k QPM / 30M per day). Needs Google app verification for >100 users. Advanced users can still bring their own client | Pending |
 | Zero maintainer infrastructure (LOCKED) | No hosted server, no shared keys, no Anthropic API calls; only the opt-in GA4 metrics reach a maintainer account (free tier) | Pending |
 | Raw fetch instead of googleapis | ~100 MB smaller, auditable | Pending |
 | Hand-rolled SVG charts | No CDN dependency, offline, one-axis rule | Pending |

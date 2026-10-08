@@ -1273,8 +1273,19 @@ async function viewSettings() {
         h(
           "div",
           { class: "setting-row" },
-          h("div", { class: "grow" }, h("strong", {}, "OAuth client"), h("span", { class: "muted" }, `${st.clientIdHint ?? "Not set"} from ${st.clientSource === "environment" ? "environment variables" : st.configDir}`)),
-          st.clientSource !== "environment" && h("a", { class: "btn", href: "/connect?step=cloud" }, "Change"),
+          h(
+            "div",
+            { class: "grow" },
+            h("strong", {}, "Google sign-in"),
+            h(
+              "span",
+              { class: "muted" },
+              st.clientSource === "builtin"
+                ? "Built-in Search Console Connector sign-in. Agencies can use their own Google Cloud project instead."
+                : `Your own OAuth client ${st.clientIdHint ?? ""} from ${st.clientSource === "environment" ? "environment variables" : st.configDir}`,
+            ),
+          ),
+          st.clientSource !== "environment" && h("a", { class: "btn", href: "/connect?step=cloud" }, st.clientSource === "builtin" ? "Use my own" : "Change"),
         ),
       ),
       h(

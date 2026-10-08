@@ -2,7 +2,7 @@
 
 Connect any website project to **Google Search Console** from **Claude Code**, Google **Antigravity** or any MCP client. Sign in with your Google account once, then ask Claude about clicks, queries, rankings and indexing, pull every GSC report as CSV with one command, and track it all in a local SEO dashboard.
 
-It's an open-source **Search Console MCP server**, a **GSC report exporter** and a **dashboard**, and it runs entirely on your computer against your own Google Cloud project.
+It's an open-source **Search Console MCP server**, a **GSC report exporter** and a **dashboard**, and it runs entirely on your computer. No Google Cloud setup, no API keys: you just sign in with Google.
 
 [![npm](https://img.shields.io/npm/v/google-search-console-connector)](https://www.npmjs.com/package/google-search-console-connector)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -28,7 +28,7 @@ That one command downloads the same reports as Search Console's Export button (D
 
 ## Features
 
-- **Sign in with Google.** A guided browser flow sets up your Google Cloud OAuth client and signs you in with Google's own OAuth 2.0 (PKCE). No passwords or API keys to paste into chat.
+- **Sign in with Google.** One click in your browser, using Google's own OAuth 2.0 (PKCE). No Google Cloud project, API keys or passwords.
 - **One-command GSC export.** Pull CSV, JSON and Markdown reports for one site or all your sites (`--all-sites`), for any range up to 16 months.
 - **MCP server for Claude Code and Antigravity.** 18 tools: performance data, hourly data, branded vs non-branded queries, URL Inspection, sitemaps, adding properties and verifying ownership.
 - **Local SEO dashboard.** KPIs against the previous period, a trend chart (hourly, daily, weekly, monthly), queries, pages, countries, devices, sitemaps and URL Inspection. Light and dark themes.
@@ -37,7 +37,7 @@ That one command downloads the same reports as Search Console's Export button (D
 - **Chart notes.** Claude can mark the chart when it ships SEO changes ("Rewrote service page titles"), so you can see what moved the numbers.
 - **Site verification.** Claude can add a new site to Search Console, put the verification meta tag in your code, and verify it after you deploy.
 - **Current with Google.** Supports the latest Search Console API features, including hourly data, Discover and Google News. A weekly check flags new API fields and Search Central announcements.
-- **Private by default.** Tokens stay on your machine. Every API call runs on your own Google Cloud project, at your own (free) quota.
+- **Private by default.** Tokens and Search Console data stay on your machine and go only to Google. There is no server in between.
 
 ## Quick start
 
@@ -61,11 +61,13 @@ To run the latest code straight from GitHub instead of npm, use `npx -y github:m
 
 > Connect this project to Google Search Console
 
-Claude calls `gsc_connect`, which opens a page in your browser. It walks you through:
+Claude calls `gsc_connect`, which opens a page in your browser:
 
-1. creating a Google Cloud OAuth client (about three minutes, once),
-2. signing in with Google,
-3. choosing which Search Console property belongs to this project.
+1. a one-time question about anonymous usage metrics (yes or no, your choice),
+2. **Sign in with Google** with the account that has your Search Console access,
+3. pick which Search Console property belongs to this project.
+
+That's it. Until Google finishes reviewing the app, Google may show "Google hasn't verified this app"; choose **Advanced → Go to Search Console Connector**.
 
 **3. Ask away:**
 
@@ -102,9 +104,9 @@ Any MCP client that can start a local (stdio) server works. Add this to its MCP 
 
 The server uses the folder it is started in as the project. If your client starts servers somewhere else, set `"env": { "GSC_PROJECT_DIR": "/path/to/your/site" }`.
 
-## Google Cloud setup
+## Advanced: use your own Google Cloud project
 
-Google only allows Search Console API access through an OAuth client that you create. The Connect page links you straight to each screen, but here is the whole list:
+Most people can skip this. Agencies and developers who want sign-in to run through their own Google Cloud project (their own quota, their own consent screen) can choose **Use my own Google Cloud project** on the sign-in page. The steps are:
 
 1. [Create a Google Cloud project](https://console.cloud.google.com/projectcreate), or pick an existing one.
 2. Enable the [Google Search Console API](https://console.cloud.google.com/apis/library/searchconsole.googleapis.com).
@@ -112,7 +114,7 @@ Google only allows Search Console API access through an OAuth client that you cr
 4. [Configure the consent screen](https://console.cloud.google.com/auth/overview): choose **External** and add your email as a test user. Then publish the app to **In production**. Apps left in "Testing" have their sign-in expire every 7 days. You don't need Google's app verification for your own use; Google will show an "unverified app" notice, and you continue with **Advanced → Go to (your app)**.
 5. [Create an OAuth client ID](https://console.cloud.google.com/auth/clients/create) of type **Desktop app**, download the JSON, and drop it on the Connect page.
 
-Both APIs are free. Google enforces quotas (for example, 1,200 Search Analytics queries per minute), and all usage counts against your project. Nothing runs through a server of ours.
+Both APIs are free. Your own client means quota and the consent screen are yours. To go back to the built-in sign-in, use the link at the top of that page, or Settings in the dashboard.
 
 ![Connect page: step-by-step Google Cloud OAuth client setup](docs/screenshots/connect-google-cloud-setup.png)
 
@@ -193,7 +195,7 @@ Search Console keeps adding features. Some reach the API and some stay in the we
 
 - The local server listens on `127.0.0.1` only, checks the `Host` header, and requires a session cookie that is set through a one-time launch link.
 - OAuth uses the loopback redirect with PKCE (S256) and a `state` check, as Google recommends for desktop apps.
-- Requested scopes: `webmasters` (Search Console), `siteverification`, and `openid email` (to show which account is connected).
+- Requested at sign-in: `webmasters` (Search Console) and `openid email` (to show which account is connected). `siteverification` is asked for separately, only the first time you verify a new site.
 
 Report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
 
@@ -202,7 +204,7 @@ Report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
 | Variable | Purpose |
 |---|---|
 | `GSC_PROJECT_DIR` | Project folder, if your MCP client starts servers elsewhere |
-| `GSC_CLIENT_ID`, `GSC_CLIENT_SECRET` | Use an OAuth client from the environment instead of `~/.gsc-connect/client.json` |
+| `GSC_CLIENT_ID`, `GSC_CLIENT_SECRET` | Use your own OAuth client from the environment instead of the built-in sign-in |
 | `GSC_CONNECT_HOME` | Where credentials are stored (default `~/.gsc-connect`) |
 | `GSC_CONNECT_PORT` | Preferred local port (default 4817; falls back to any free port) |
 | `GSC_CONNECT_TELEMETRY=0`, `DO_NOT_TRACK=1` | Never send usage metrics |
@@ -211,10 +213,13 @@ Report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
 ## FAQ
 
 **Is the Google Search Console API free?**
-Yes. Google charges nothing for the Search Console API or the Site Verification API. You get per-project quotas, and this tool uses yours.
+Yes. Google charges nothing for the Search Console API or the Site Verification API, and this tool has no paid parts.
 
-**Why do I need my own Google Cloud OAuth client?**
-Search Console data is sensitive, so Google requires apps to go through OAuth. A shared client would need Google's app verification and would be capped at 100 users. Your own client means the access belongs to you alone.
+**Do I need a Google Cloud account?**
+No. You sign in with the Google account you already use for Search Console. Your own Google Cloud project is an optional advanced setting.
+
+**Who can see my data?**
+Only you and Google. The sign-in grants access to your computer, not to a server: tokens are stored in `~/.gsc-connect/` and reports are saved in your project folder. See the [privacy policy](docs/privacy-policy.md).
 
 **Can I export more than 1,000 rows?**
 Yes. Search Console's web export stops at 1,000 rows. The API returns up to 25,000 per request, and this tool keeps paging, up to Google's limit of 50,000 rows per day per search type.

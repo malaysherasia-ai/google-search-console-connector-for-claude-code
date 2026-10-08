@@ -531,3 +531,35 @@ details.disclosure code {
 .prop-list + div > .alert {
   margin-top: 16px;
 }
+
+.connect-main {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.connect-main .credit {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.easy-path {
+  margin-bottom: 20px;
+}
+.easy-path .link-btn {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+#stepper li[hidden] {
+  display: none;
+}
+
+.link-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}

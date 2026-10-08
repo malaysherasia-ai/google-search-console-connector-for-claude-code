@@ -4,6 +4,7 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { BUILTIN_CLIENT, hasBuiltinClient } from "./builtin-client.js";
 
 export const CONFIG_DIR =
   process.env.GSC_CONNECT_HOME ?? path.join(os.homedir(), ".gsc-connect");
@@ -61,11 +62,26 @@ async function writePrivateJson(file: string, data: unknown): Promise<void> {
   await fs.rename(tmp, file);
 }
 
-export async function loadClient(): Promise<ClientCredentials | undefined> {
+export type ClientSource = "environment" | "own" | "builtin";
+
+/** Which OAuth client to use: environment variables, then the user's own client, then the built-in one. */
+export async function loadClientInfo(): Promise<{ client?: ClientCredentials; source: ClientSource | null }> {
   const id = process.env.GSC_CLIENT_ID;
   const secret = process.env.GSC_CLIENT_SECRET;
-  if (id && secret) return { clientId: id, clientSecret: secret };
-  return readJson<ClientCredentials>(CLIENT_FILE);
+  if (id && secret) return { client: { clientId: id, clientSecret: secret }, source: "environment" };
+  const own = await readJson<ClientCredentials>(CLIENT_FILE);
+  if (own) return { client: own, source: "own" };
+  if (hasBuiltinClient()) return { client: { ...BUILTIN_CLIENT }, source: "builtin" };
+  return { source: null };
+}
+
+export async function loadClient(): Promise<ClientCredentials | undefined> {
+  return (await loadClientInfo()).client;
+}
+
+/** Forget the user's own client so the built-in one is used again. */
+export async function removeClient(): Promise<void> {
+  await fs.rm(CLIENT_FILE, { force: true });
 }
 
 export async function saveClient(client: ClientCredentials): Promise<void> {

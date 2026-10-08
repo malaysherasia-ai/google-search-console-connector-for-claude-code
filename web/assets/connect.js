@@ -18,7 +18,18 @@ async function boot() {
   // Clean ?error / ?signedIn out of the address bar after reading them.
   if (location.search) history.replaceState(null, "", "/connect");
   track("page_view", { page_title: "connect" });
+  if (params.get("upgraded") === "verify") return route("upgraded");
+  if (params.get("upgrade") === "verify") return route("upgrade");
   route(params.get("step") === "cloud" && state.telemetryConsent !== null ? "cloud" : undefined);
+}
+
+// With the built-in Google sign-in there is no Google Cloud step at all.
+const simple = () => state.builtinAvailable && state.clientSource === "builtin";
+const steps = () => (simple() ? ["signin", "property"] : ["cloud", "signin", "property"]);
+
+function stepLabel(view) {
+  const i = steps().indexOf(view);
+  return i < 0 ? "Advanced setup" : `Step ${i + 1} of ${steps().length}`;
 }
 
 function route(force) {
@@ -27,15 +38,16 @@ function route(force) {
     (state.telemetryConsent === null ? "consent" : !state.hasClient ? "cloud" : !state.connected ? "signin" : "property");
   setStepper(view);
   if (view !== "consent") track("connect_step", { step: view });
-  ({ consent, cloud, signin, property, done })[view]();
+  ({ consent, cloud, signin, property, done, upgrade, upgraded })[view]();
   panel.querySelector("h2")?.focus({ preventScroll: true });
   window.scrollTo(0, 0);
 }
 
 function setStepper(view) {
-  const order = ["cloud", "signin", "property"];
-  const at = view === "done" ? 3 : view === "consent" ? -1 : order.indexOf(view);
-  document.querySelectorAll("#stepper li").forEach((li, i) => {
+  const order = steps();
+  document.querySelector('#stepper li[data-step="cloud"]').hidden = simple();
+  const at = view === "done" ? order.length : order.indexOf(view);
+  document.querySelectorAll("#stepper li:not([hidden])").forEach((li, i) => {
     if (i < at) li.dataset.state = "done";
     else if (i === at) li.dataset.state = "current";
     else delete li.dataset.state;
@@ -188,9 +200,21 @@ function cloud() {
 
   const redirect = h("code", {}, state.redirectUri.replace(/:\d+\//, ":<any port>/"));
 
+  const useBuiltin = async () => {
+    if (state.clientSource === "own") await api("/api/client", { useBuiltin: true });
+    Object.assign(state, { clientSource: "builtin", hasClient: true, connected: false });
+    route("signin");
+  };
   fill(panel, 
+    state.builtinAvailable &&
+      h(
+        "div",
+        { class: "alert alert-good easy-path" },
+        icon("info"),
+        h("div", {}, "Most people don’t need this. ", h("button", { class: "link-btn", type: "button", onclick: useBuiltin }, "Sign in with Google directly"), " instead; this page is for agencies and developers who want to use their own Google Cloud project."),
+      ),
     head(
-      "Step 1 of 3",
+      stepLabel("cloud"),
       "Create your Google OAuth client",
       "Google only lets apps read Search Console through an OAuth client. You create your own, so the access belongs to you and no one else. This takes about three minutes, once.",
     ),
@@ -226,7 +250,7 @@ function signin() {
   const err = params.get("error");
   params.delete("error");
   fill(panel, 
-    head("Step 2 of 3", "Sign in with Google", "Use the Google account that has access to your Search Console properties."),
+    head(stepLabel("signin"), "Sign in with Google", "Use the Google account that has access to your Search Console properties."),
     err ? errorAlert(err) : null,
     h(
       "div",
@@ -239,21 +263,24 @@ function signin() {
           "ul",
           { class: "scope-list" },
           h("li", {}, h("span", { class: "scope-icon" }, icon("overview")), h("div", {}, h("strong", {}, "View and manage Search Console data"), h("span", {}, "Performance reports, URL Inspection, sitemaps, and adding properties."))),
-          h("li", {}, h("span", { class: "scope-icon" }, icon("check")), h("div", {}, h("strong", {}, "Verify site ownership"), h("span", {}, "Get verification tags for new sites and confirm them with Google."))),
           h("li", {}, h("span", { class: "scope-icon" }, icon("user")), h("div", {}, h("strong", {}, "See your email address"), h("span", {}, "Only to show which account is connected."))),
         ),
-        h(
-          "div",
-          { class: "alert", role: "note" },
-          icon("info"),
-          h("div", {}, "Google may warn that it “hasn’t verified this app”. The app is your own OAuth client, so choose ", h("strong", {}, "Advanced"), ", then ", h("strong", {}, "Go to (your app name)"), "."),
-        ),
+        simple() && state.builtinVerified
+          ? null
+          : h(
+              "div",
+              { class: "alert", role: "note" },
+              icon("info"),
+              simple()
+                ? h("div", {}, "While Google reviews this new app, it may show “Google hasn’t verified this app”. Choose ", h("strong", {}, "Advanced"), ", then ", h("strong", {}, "Go to Search Console Connector"), ".")
+                : h("div", {}, "Google may warn that it “hasn’t verified this app”. The app is your own OAuth client, so choose ", h("strong", {}, "Advanced"), ", then ", h("strong", {}, "Go to (your app name)"), "."),
+            ),
         h(
           "div",
           { class: "actions" },
           h("a", { class: "btn btn-google", href: "/auth/start" }, h("span", { html: GOOGLE_G }), "Sign in with Google"),
           h("span", { class: "spacer" }),
-          h("button", { class: "btn btn-ghost", type: "button", onclick: () => route("cloud") }, "Use different credentials"),
+          h("button", { class: "btn btn-ghost", type: "button", onclick: () => route("cloud") }, simple() ? "Use my own Google Cloud project" : "Use different credentials"),
         ),
       ),
     ),
@@ -264,7 +291,7 @@ function signin() {
 
 async function property() {
   fill(panel, 
-    head("Step 3 of 3", `Choose the property for ${state.projectName}`, "Claude Code will use this property by default when you work in this project. You can change it later."),
+    head(stepLabel("property"), `Choose the property for ${state.projectName}`, "Claude Code will use this property by default when you work in this project. You can change it later."),
     h("div", { class: "panel-loading" }, h("span", { class: "spinner" }), "Loading your properties"),
   );
 
@@ -272,7 +299,7 @@ async function property() {
   try {
     ({ sites } = await api("/api/sites"));
   } catch (err) {
-    fill(panel, head("Step 3 of 3", "Couldn’t load your properties"), errorAlert(err.message), h("div", { class: "actions" }, h("button", { class: "btn", onclick: () => route("property") }, "Try again"), h("button", { class: "btn btn-ghost", onclick: () => route("signin") }, "Sign in again")));
+    fill(panel, head(stepLabel("property"), "Couldn’t load your properties"), errorAlert(err.message), h("div", { class: "actions" }, h("button", { class: "btn", onclick: () => route("property") }, "Try again"), h("button", { class: "btn btn-ghost", onclick: () => route("signin") }, "Sign in again")));
     return;
   }
 
@@ -296,7 +323,7 @@ async function property() {
 
   if (!sites.length) {
     fill(panel, 
-      head("Step 3 of 3", "No properties on this account yet", `${state.email ?? "This account"} doesn’t have any Search Console properties. Claude Code can add and verify this site for you.`),
+      head(stepLabel("property"), "No properties on this account yet", `${state.email ?? "This account"} doesn’t have any Search Console properties. Claude Code can add and verify this site for you.`),
       banner,
       h(
         "div",
@@ -324,7 +351,7 @@ async function property() {
   );
 
   fill(panel, 
-    head("Step 3 of 3", `Choose the property for ${state.projectName}`, "Claude Code will use this property by default when you work in this project. You can change it later."),
+    head(stepLabel("property"), `Choose the property for ${state.projectName}`, "Claude Code will use this property by default when you work in this project. You can change it later."),
     banner,
     list,
     errorBox,
@@ -346,6 +373,30 @@ async function property() {
       h("button", { class: "btn btn-ghost", onclick: () => finish() }, "Skip for now"),
     ),
   );
+}
+
+// ---------- Extra permission: site verification ----------
+
+function upgrade() {
+  fill(
+    panel,
+    head("One more permission", "Allow site verification", "Claude Code wants to verify that you own a new site in Search Console. Google asks for your permission once; after that it just works."),
+    h(
+      "div",
+      { class: "card" },
+      h(
+        "div",
+        { class: "card-body" },
+        h("ul", { class: "scope-list" }, h("li", {}, h("span", { class: "scope-icon" }, icon("check")), h("div", {}, h("strong", {}, "Verify site ownership"), h("span", {}, "Get the verification tag for a new site and confirm it with Google.")))),
+        h("div", { class: "actions" }, h("a", { class: "btn btn-google", href: "/auth/start?scopes=verify" }, h("span", { html: GOOGLE_G }), "Continue with Google")),
+      ),
+    ),
+  );
+}
+
+async function upgraded() {
+  await api("/api/finish", {}).catch(() => {});
+  fill(panel, h("div", { class: "done-mark" }, icon("check")), head(null, "Site verification allowed", "You can close this tab. Claude Code will carry on verifying your site."));
 }
 
 // ---------- Done ----------
