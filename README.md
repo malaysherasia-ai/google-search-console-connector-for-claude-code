@@ -55,6 +55,8 @@ On Windows, wrap `npx` in `cmd /c`:
 claude mcp add gsc --scope user -- cmd /c npx -y google-search-console-connector@latest
 ```
 
+To run the latest code straight from GitHub instead of npm, use `npx -y github:malaysherasia-ai/google-search-console-connector-for-claude-code` in place of `npx -y google-search-console-connector@latest`. The first start takes about 20 seconds while it builds.
+
 **2. Connect a website project.** Open Claude Code in the website's folder and say:
 
 > Connect this project to Google Search Console
