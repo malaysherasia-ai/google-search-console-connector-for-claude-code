@@ -11,15 +11,26 @@
 //  - Events go from this local process to Google; no tracking script runs in
 //    the browser and no cookies are set.
 import crypto from "node:crypto";
-import { promises as fs } from "node:fs";
+import { readFileSync, promises as fs } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { CONFIG_DIR } from "./store.js";
 import { VERSION } from "./version.js";
 
-// GA4 property owned by the project maintainer. Measurement Protocol
-// credentials are not secrets (they only allow sending events).
-const MEASUREMENT_ID = process.env.GSC_CONNECT_GA_ID ?? "G-XXXXXXXXXX";
-const API_SECRET = process.env.GSC_CONNECT_GA_SECRET ?? "";
+// GA4 property owned by the project maintainer. The Measurement Protocol API
+// secret is kept out of git: `npm run build` writes dist/ga-config.json from
+// the GA_API_SECRET environment variable when publishing (scripts/write-ga-config.mjs).
+// It only allows sending events, never reading data.
+function bundledSecret(): string {
+  try {
+    const file = path.join(path.dirname(fileURLToPath(import.meta.url)), "ga-config.json");
+    return String(JSON.parse(readFileSync(file, "utf8")).apiSecret ?? "");
+  } catch {
+    return "";
+  }
+}
+const MEASUREMENT_ID = process.env.GSC_CONNECT_GA_ID ?? "G-TC1ZF78VKL";
+const API_SECRET = process.env.GSC_CONNECT_GA_SECRET ?? bundledSecret();
 
 const FILE = path.join(CONFIG_DIR, "telemetry.json");
 const LOG = path.join(CONFIG_DIR, "telemetry-log.jsonl");

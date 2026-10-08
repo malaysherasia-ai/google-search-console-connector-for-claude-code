@@ -28,7 +28,7 @@ With GSD: `/gsd:new-milestone` with the Google changes and usage findings, then 
 
 1. Update `src/version.ts` and `package.json`. New API support is a minor release; fixes are patches.
 2. Add a `CHANGELOG.md` entry.
-3. `npm run build`, test against a real property, and refresh the README screenshots if the UI changed (`npm run demo`).
+3. Build with the GA4 secret so usage metrics can be sent: `GA_API_SECRET=<secret> npm run build` (PowerShell: `$env:GA_API_SECRET="<secret>"; npm run build`). The secret goes into `dist/ga-config.json`, which is published to npm but never committed. `npm publish` rebuilds via `prepublishOnly`, so keep the variable set in that shell. Then test against a real property, and refresh the README screenshots if the UI changed (`npm run demo`).
 4. Accept the new Google snapshot: `node scripts/check-google-updates.mjs --update`.
 5. Tag `vX.Y.Z`, push, `npm publish`, and create a GitHub release from the changelog.
 6. Users see a "new version available" notice in the CLI and dashboard within a day.
