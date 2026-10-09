@@ -1,6 +1,8 @@
 # Privacy Policy: Search Console Connector
 
-_Last updated: October 8, 2026_
+Published at https://www.claude-repo.com/google-search-console-connector/privacy (this file is the source).
+
+_Last updated: October 9, 2026_
 
 Search Console Connector ("the app") is a free, open-source tool by Malay Sherasia that connects a website project to Google Search Console from Claude Code, Google Antigravity and other AI coding assistants, and shows the data in a dashboard on the user's own computer. Source code: https://github.com/malaysherasia-ai/google-search-console-connector-for-claude-code
 
@@ -46,7 +48,7 @@ Once a day the app asks the public npm registry for the latest version number. N
 
 ## Contact
 
-Questions about this policy: CONTACT_EMAIL, or open an issue at https://github.com/malaysherasia-ai/google-search-console-connector-for-claude-code/issues
+Questions about this policy: open an issue at https://github.com/malaysherasia-ai/google-search-console-connector-for-claude-code/issues, or reach Malay Sherasia through https://malay.sherasia.com
 
 ## Changes
 
