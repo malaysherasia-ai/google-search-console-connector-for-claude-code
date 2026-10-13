@@ -305,7 +305,7 @@ export async function runMcpServer(): Promise<void> {
     "gsc_inspect_url",
     {
       title: "Inspect URL",
-      description: "URL Inspection: index status, coverage, last crawl, canonical, mobile usability, and rich results for one URL in the property.",
+      description: "URL Inspection: index status, coverage, last crawl, canonical and rich results for one URL in the property.",
       inputSchema: {
         url: z.string().url().describe("Fully-qualified URL that belongs to the property"),
         siteUrl: siteUrlArg,

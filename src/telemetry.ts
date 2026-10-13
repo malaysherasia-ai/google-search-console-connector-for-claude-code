@@ -19,7 +19,7 @@ import { VERSION } from "./version.js";
 
 // GA4 property owned by the project maintainer. The Measurement Protocol API
 // secret is kept out of git: `npm run build` writes dist/ga-config.json from
-// the GA_API_SECRET environment variable when publishing (scripts/write-ga-config.mjs).
+// the GA_API_SECRET environment variable when publishing (scripts/write-build-config.mjs).
 // It only allows sending events, never reading data.
 function bundledSecret(): string {
   try {

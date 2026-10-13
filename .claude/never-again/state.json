@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "nextId": 3,
+  "nextId": 4,
   "cap": 40,
   "loadedWarn": 60,
   "tokensPerPreventedRepeat": 8000,
@@ -23,6 +23,13 @@
       "file": "LESSONS.md",
       "trigger": "commit",
       "created": "2026-10-08"
+    },
+    "L003": {
+      "form": "rule",
+      "scope": "api",
+      "rule": "Drop deprecated or unpopulated Google API fields in src/gsc.ts before returning responses",
+      "file": "LESSONS.md",
+      "created": "2026-10-13"
     }
   }
 }

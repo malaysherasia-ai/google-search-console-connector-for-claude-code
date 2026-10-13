@@ -28,7 +28,11 @@ With GSD: `/gsd:new-milestone` with the Google changes and usage findings, then 
 
 1. Update `src/version.ts` and `package.json`. New API support is a minor release; fixes are patches.
 2. Add a `CHANGELOG.md` entry.
-3. Build with the GA4 secret so usage metrics can be sent: `GA_API_SECRET=<secret> npm run build` (PowerShell: `$env:GA_API_SECRET="<secret>"; npm run build`). The secret goes into `dist/ga-config.json`, which is published to npm but never committed. `npm publish` rebuilds via `prepublishOnly`, so keep the variable set in that shell. Then test against a real property, and refresh the README screenshots if the UI changed (`npm run demo`).
+3. Build with the build-time config, which is published to npm but never committed (`scripts/write-build-config.mjs`):
+   - **OAuth client** for one-click sign-in: keep `.oauth-client.json` (gitignored, `{"clientId": "...", "clientSecret": "..."}`) in the repo root, or set `GSC_OAUTH_CLIENT_ID` and `GSC_OAUTH_CLIENT_SECRET`. It goes into `dist/builtin-client.json`. Without it the package asks users to bring their own client, so check the build prints `Wrote dist/builtin-client.json`.
+   - **GA4 secret** so usage metrics can be sent: `GA_API_SECRET=<secret> npm run build` (PowerShell: `$env:GA_API_SECRET="<secret>"; npm run build`). It goes into `dist/ga-config.json`.
+
+   `npm publish` rebuilds via `prepublishOnly`, so keep the variables set in that shell. Then test against a real property, and refresh the README screenshots if the UI changed (`npm run demo`).
 4. Accept the new Google snapshot: `node scripts/check-google-updates.mjs --update`.
 5. Tag `vX.Y.Z`, push, `npm publish`, and create a GitHub release from the changelog.
 6. Users see a "new version available" notice in the CLI and dashboard within a day.

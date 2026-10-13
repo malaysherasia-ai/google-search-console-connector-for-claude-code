@@ -127,13 +127,22 @@ export async function searchAnalyticsAll(siteUrl: string, req: SearchAnalyticsRe
   return out;
 }
 
-export const inspectUrl = (siteUrl: string, inspectionUrl: string, languageCode = "en-US") =>
-  isDemo() ? Promise.resolve(demo.demoInspect(siteUrl, inspectionUrl)) : call<{ inspectionResult: unknown }>("POST", INSPECTION, { siteUrl, inspectionUrl, languageCode });
+export async function inspectUrl(siteUrl: string, inspectionUrl: string, languageCode = "en-US") {
+  if (isDemo()) return demo.demoInspect(siteUrl, inspectionUrl);
+  const res = await call<{ inspectionResult?: Record<string, unknown> }>("POST", INSPECTION, { siteUrl, inspectionUrl, languageCode });
+  // Mobile Usability was retired in Dec 2023; the API still returns VERDICT_UNSPECIFIED, which reads as a problem.
+  if (res.inspectionResult) delete res.inspectionResult.mobileUsabilityResult;
+  return res;
+}
 
 export async function listSitemaps(siteUrl: string): Promise<unknown[]> {
   if (isDemo()) return demo.demoSitemaps(siteUrl);
-  const res = await call<{ sitemap?: unknown[] }>("GET", `${WEBMASTERS}/sites/${enc(siteUrl)}/sitemaps`);
-  return res.sitemap ?? [];
+  const res = await call<{ sitemap?: Array<Record<string, any>> }>("GET", `${WEBMASTERS}/sites/${enc(siteUrl)}/sitemaps`);
+  // contents[].indexed is deprecated and always "0"; drop it so it isn't read as "nothing indexed".
+  return (res.sitemap ?? []).map((s) => ({
+    ...s,
+    contents: s.contents?.map(({ indexed: _indexed, ...c }: Record<string, unknown>) => c),
+  }));
 }
 
 export const submitSitemap = (siteUrl: string, feedpath: string) =>
