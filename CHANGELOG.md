@@ -7,7 +7,7 @@ All notable changes to this project. Versions follow [Semantic Versioning](https
 First release.
 
 - One-click Google sign-in (built-in OAuth client; own Google Cloud project optional), site-verification permission requested only when needed
-- claude-repo.com brand: dark theme by default, Inter and JetBrains Mono self-hosted (no Google Fonts requests), gsc-connector wordmark, new icon
+- claude-repo.com brand: dark theme by default, Inter and JetBrains Mono self-hosted (no Google Fonts requests), gsc-connector wordmark, chain-link icon
 - Privacy policy and Google verification guide in docs/
 - Built-in OAuth client is added at build time (`dist/builtin-client.json`) and never committed; installs from GitHub use your own client
 - `gsc_list_sitemaps` no longer returns Google's deprecated, always-zero `indexed` count
