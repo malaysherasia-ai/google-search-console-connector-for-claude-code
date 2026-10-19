@@ -71,7 +71,7 @@ Claude calls `gsc_connect`, which opens a page in your browser:
 
 ![Connect page: Sign in with Google, then choose the property for this project](docs/screenshots/sign-in-with-google.png)
 
-That's it. Until Google finishes reviewing the app, Google may show "Google hasn't verified this app"; choose **Advanced → Go to Search Console Connector**.
+That's it. Google has verified the app's branding and it only asks for non-sensitive permissions, so there's no "unverified app" screen to click through.
 
 **3. Ask away:**
 

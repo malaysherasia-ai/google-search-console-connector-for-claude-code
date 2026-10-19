@@ -1,6 +1,6 @@
 {
   "name": "google-search-console-connector",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "mcpName": "io.github.malaysherasia-ai/google-search-console-connector",
   "description": "Google Search Console for Claude Code: MCP server, one-command GSC report export (CSV), URL inspection, sitemaps, site verification and a local SEO dashboard. Sign in with Google in one click; runs locally, no API keys.",
   "keywords": [

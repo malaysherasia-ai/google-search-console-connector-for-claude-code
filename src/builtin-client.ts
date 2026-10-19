@@ -26,7 +26,7 @@ function bundledClient(): { clientId: string; clientSecret: string } {
 
 export const BUILTIN_CLIENT = bundledClient();
 
-/** Set to true once Google has verified the app's OAuth consent screen. */
-export const BUILTIN_VERIFIED = false;
+/** True: branding is verified and every scope is non-sensitive, so Google shows no "unverified app" screen. */
+export const BUILTIN_VERIFIED = true;
 
 export const hasBuiltinClient = () => BUILTIN_CLIENT.clientId.length > 0 && BUILTIN_CLIENT.clientSecret.length > 0;

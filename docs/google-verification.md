@@ -24,9 +24,11 @@ The connector ships one Google OAuth client so users only click "Sign in with Go
    - `https://www.googleapis.com/auth/siteverification`
 6. **Client:** https://console.cloud.google.com/auth/clients/create. Application type **Desktop app**, name `Search Console Connector desktop`. Copy the **Client ID** and **Client secret** into `src/builtin-client.ts`.
 
-From here the app works for up to 100 users, who see the "Google hasn't verified this app" notice.
+From here the app works for up to 100 users, who see the "Google hasn't verified this app" notice, until Part B is done.
 
-## Part B: Google verification (removes the warning and the 100-user cap)
+**Status (2026-10-19):** branding is verified, and Google's Data access page lists all four scopes (`openid`, `userinfo.email`, `webmasters`, `siteverification`) as **non-sensitive**, so the Verification centre says "Verification is not required". There is no 100-user cap and no warning screen, and Part B below is not needed. Re-check this if a sensitive scope is ever added.
+
+## Part B: Google verification (only needed for sensitive scopes)
 
 Before submitting:
 

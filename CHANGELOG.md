@@ -2,6 +2,11 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org/).
 
+## 0.1.2 (2026-10-19)
+
+- Connect page always shows which Google account is signed in, with a "Use a different account" link
+- No more "Google may say this app isn't verified" note: the app's branding is verified and every permission it asks for is non-sensitive, so Google shows no warning
+
 ## 0.1.1 (2026-10-19)
 
 - Listed on the official MCP Registry as `io.github.malaysherasia-ai/google-search-console-connector` (`mcpName` in package.json, `server.json`)
