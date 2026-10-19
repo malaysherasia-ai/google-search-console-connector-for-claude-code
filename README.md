@@ -66,12 +66,16 @@ To run the latest code straight from GitHub instead of npm, use `npx -y github:m
 Claude calls `gsc_connect`, which opens a page in your browser:
 
 1. a one-time question about anonymous usage metrics (yes or no, your choice),
-2. **Sign in with Google** with the account that has your Search Console access,
+2. **Sign in with Google** with the account that has your Search Console access. On Google's second screen, **tick the box** next to "View and manage Search Console data for your verified sites" before you click Continue; Google leaves it unticked,
 3. pick which Search Console property belongs to this project.
 
-![Connect page: Sign in with Google, then choose the property for this project](docs/screenshots/sign-in-with-google.png)
+![Connect page: Sign in with Google, with a reminder to tick the Search Console box on Google's screen](docs/screenshots/sign-in-with-google.png)
 
-That's it. Google has verified the app's branding and it only asks for non-sensitive permissions, so there's no "unverified app" screen to click through.
+What Google shows you (account details hidden):
+
+![Google's sign-in for Search Console Connector: choose your account and click Continue, then tick the Search Console box and click Continue](docs/google-signin.gif)
+
+That's it. Google has verified the app's branding and it only asks for non-sensitive permissions, so there's no "unverified app" screen to click through. If you continue without ticking the box, the connector keeps your previous sign-in and asks you to try again.
 
 **3. Ask away:**
 
