@@ -34,3 +34,6 @@ dist/
 
 # Built-in OAuth client for publishing (read by scripts/write-build-config.mjs; never commit)
 .oauth-client.json
+
+# GSD planning notes: kept locally, not published
+.planning/
