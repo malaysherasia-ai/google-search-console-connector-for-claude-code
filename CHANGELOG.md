@@ -2,6 +2,12 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org/).
 
+## 0.1.1 (2026-10-19)
+
+- Listed on the official MCP Registry as `io.github.malaysherasia-ai/google-search-console-connector` (`mcpName` in package.json, `server.json`)
+- Demo GIF at the top of the README (`docs/demo.gif`; `docs/demo.mp4` for social posts)
+- Package description no longer says you need your own Google Cloud project
+
 ## 0.1.0 (2026-10-19)
 
 First release.

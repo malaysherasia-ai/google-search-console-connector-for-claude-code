@@ -26,7 +26,7 @@ With GSD: `/gsd:new-milestone` with the Google changes and usage findings, then 
 
 ## 3. Ship
 
-1. Update `src/version.ts` and `package.json`. New API support is a minor release; fixes are patches.
+1. Update `src/version.ts`, `package.json` and both `version` fields in `server.json` (the MCP Registry entry). New API support is a minor release; fixes are patches.
 2. Add a `CHANGELOG.md` entry.
 3. Build with the build-time config, which is published to npm but never committed (`scripts/write-build-config.mjs`):
    - **OAuth client** for one-click sign-in: keep `.oauth-client.json` (gitignored, `{"clientId": "...", "clientSecret": "..."}`) in the repo root, or set `GSC_OAUTH_CLIENT_ID` and `GSC_OAUTH_CLIENT_SECRET`. It goes into `dist/builtin-client.json`. Without it the package asks users to bring their own client, so check the build prints `Wrote dist/builtin-client.json`.
@@ -34,5 +34,6 @@ With GSD: `/gsd:new-milestone` with the Google changes and usage findings, then 
 
    `npm publish` rebuilds via `prepublishOnly`, so keep the variables set in that shell. Then test against a real property, and refresh the README screenshots if the UI changed (`npm run demo`).
 4. Accept the new Google snapshot: `node scripts/check-google-updates.mjs --update`.
-5. Tag `vX.Y.Z`, push, `npm publish`, and create a GitHub release from the changelog.
-6. Users see a "new version available" notice in the CLI and dashboard within a day.
+5. Tag `vX.Y.Z`, push, `npm publish`, and create a GitHub release from the changelog. Run `npm publish` in a normal terminal: npm asks for 2FA approval in the browser.
+6. Once `npm view google-search-console-connector@X.Y.Z version` answers (new versions are staged for a few minutes), run `mcp-publisher publish` to update the MCP Registry. It rejects a version that isn't on npm yet.
+7. Users see a "new version available" notice in the CLI and dashboard within a day.

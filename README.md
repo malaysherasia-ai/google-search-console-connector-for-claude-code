@@ -8,7 +8,9 @@ It's an open-source **Search Console MCP server**, a **GSC report exporter** and
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js 20+](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](package.json)
 
-![Search Console dashboard: clicks, impressions, CTR and average position with a trend chart, top queries and top pages](docs/screenshots/dashboard-overview.png)
+![Demo of the Google Search Console connector: Claude Code answers "How did my site do this week?" with Search Console clicks, rankings and a fix to make; one command exports every GSC report as CSV; the local SEO dashboard shows the clicks trend and striking-distance keyword opportunities](docs/demo.gif)
+
+If you find it useful, a ⭐ on GitHub helps other people find it.
 
 **Docs and updates:** [claude-repo.com/google-search-console-connector](https://claude-repo.com/google-search-console-connector)
 

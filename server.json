@@ -1,0 +1,19 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.malaysherasia-ai/google-search-console-connector",
+  "title": "Google Search Console Connector",
+  "description": "Google Search Console: search analytics, CSV reports, URL inspection, sitemaps, site verification.",
+  "repository": {
+    "url": "https://github.com/malaysherasia-ai/google-search-console-connector-for-claude-code",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "google-search-console-connector",
+      "version": "0.1.1",
+      "transport": { "type": "stdio" }
+    }
+  ]
+}
