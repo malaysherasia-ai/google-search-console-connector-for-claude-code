@@ -303,7 +303,15 @@ async function property() {
     return;
   }
 
-  const banner = params.get("signedIn") && state.email ? h("div", { class: "alert alert-good" }, icon("check"), h("div", {}, `Signed in as ${state.email}`)) : null;
+  // Always say which account this is, so someone already signed in can switch.
+  const banner = state.email
+    ? h(
+        "div",
+        { class: params.get("signedIn") ? "alert alert-good" : "alert" },
+        icon(params.get("signedIn") ? "check" : "user"),
+        h("div", {}, "Signed in as ", h("strong", {}, state.email), ". ", h("a", { href: "/auth/start" }, "Use a different account")),
+      )
+    : null;
   params.delete("signedIn");
   const errorBox = h("div", {});
 
