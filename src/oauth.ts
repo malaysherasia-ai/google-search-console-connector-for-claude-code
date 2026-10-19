@@ -16,7 +16,8 @@ const REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke";
 
 // Asked at sign-in: read/write Search Console (reports, sitemaps, adding
 // properties) and the email address, to show which account is connected.
-export const SCOPES = ["openid", "email", "https://www.googleapis.com/auth/webmasters"];
+export const SEARCH_CONSOLE_SCOPE = "https://www.googleapis.com/auth/webmasters";
+export const SCOPES = ["openid", "email", SEARCH_CONSOLE_SCOPE];
 
 // Asked only the first time someone verifies a new site (incremental auth).
 export const VERIFY_SCOPE = "https://www.googleapis.com/auth/siteverification";
@@ -121,6 +122,11 @@ export async function exchangeCode(
   });
   if (!json.refresh_token) {
     throw new Error("Google did not return a refresh token. Remove the app at https://myaccount.google.com/permissions and connect again.");
+  }
+  // Google's consent screen shows Search Console access as a checkbox that starts unticked.
+  // Without it every call fails, so don't save (and overwrite a working sign-in with) these tokens.
+  if (!json.scope?.split(" ").includes(SEARCH_CONSOLE_SCOPE)) {
+    throw new Error("Search Console access wasn't allowed. Sign in again and tick the box next to “View and manage Search Console data for your verified sites” before clicking Continue.");
   }
   const tokens: StoredTokens = {
     refreshToken: json.refresh_token,

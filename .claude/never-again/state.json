@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "nextId": 4,
+  "nextId": 5,
   "cap": 40,
   "loadedWarn": 60,
   "tokensPerPreventedRepeat": 8000,
@@ -30,6 +30,13 @@
       "rule": "Drop deprecated or unpopulated Google API fields in src/gsc.ts before returning responses",
       "file": "LESSONS.md",
       "created": "2026-10-13"
+    },
+    "L004": {
+      "form": "rule",
+      "scope": "auth",
+      "rule": "After an OAuth code exchange, check the granted scope has every scope the feature needs before saving tokens",
+      "file": "LESSONS.md",
+      "created": "2026-10-19"
     }
   }
 }

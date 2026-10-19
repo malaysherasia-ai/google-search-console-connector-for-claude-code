@@ -277,6 +277,12 @@ function signin() {
             ),
         h(
           "div",
+          { class: "alert", role: "note" },
+          icon("check"),
+          h("div", {}, "On Google’s screen, ", h("strong", {}, "tick the box"), " next to “View and manage Search Console data”, then click ", h("strong", {}, "Continue"), ". Without it the connector can’t see your sites."),
+        ),
+        h(
+          "div",
           { class: "actions" },
           h("a", { class: "btn btn-google", href: "/auth/start" }, h("span", { html: GOOGLE_G }), "Sign in with Google"),
           h("span", { class: "spacer" }),

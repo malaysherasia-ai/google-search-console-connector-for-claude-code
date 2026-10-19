@@ -2,6 +2,11 @@
 
 All notable changes to this project. Versions follow [Semantic Versioning](https://semver.org/).
 
+## 0.1.3 (2026-10-19)
+
+- Sign-in no longer half-succeeds when the Search Console box on Google's consent screen is left unticked: the connector keeps your existing sign-in and asks you to sign in again and tick the box
+- The Connect page tells you to tick that box before you go to Google
+
 ## 0.1.2 (2026-10-19)
 
 - Connect page always shows which Google account is signed in, with a "Use a different account" link
